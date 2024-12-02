@@ -77,7 +77,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': '3340database',
         'USER' : 'root',
-        'PASSWORD' : 'Garmike23ghi.',
+        'PASSWORD' : 'password',
         'HOST' : 'localhost',
         'POST' : '3306',
 

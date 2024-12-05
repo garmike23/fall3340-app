@@ -1,4 +1,3 @@
-
 {% extends 'todo/main.html' %}
 
 {% block content %}
@@ -9,12 +8,11 @@
         <h3>You have <i>{{ count }} incomplete task{{ count|pluralize:'s' }}</i></h3>
     </div>
     {% if request.user.is_authenticated %}
-    <a href="{% url 'login' %}">Logout</a>
+    <a href="{% url 'logout' %}">Logout</a>
     {% else %}
     <a href="{% url 'login' %}">Login</a>
-{% endif %}
+    {% endif %}
 </div>
-
 
 <div id="search-add-wrapper">
     <form action="" method="get">
@@ -24,51 +22,93 @@
     <a id="add-link" href="{% url 'task-create' %}">&#x2b;</a>
 </div>
 
-<div class="card-bdy">
-    
 <div class="task-items-wrapper">
     {% for tasks in task %}
-    <div class="task-wrapper">
-        {% if tasks.complete %}
+    <div class="task-wrapper" style="display: flex; justify-content: space-between; align-items: center;">
         <div class="task-title">
+            {% if tasks.complete %}
             <div class="task-complete-icon"></div>
-            <i><s><a href="{% url 'tasks-update' tasks.id%}">{{ tasks }}</a></s></i>
-        </div>
-        <a class="delete-link" href="{% url 'tasks-delete' tasks.id %}">&#215;</a>
-
-        {% else %}
-        <div class="task-title">
+            <i><s><a href="{% url 'tasks-update' tasks.id%}">{{ tasks.title }}</a></s></i>
+            {% else %}
             <div class="task-incomplete-icon"></div>
-            <a href="{% url 'tasks-update' tasks.id%}">{{ tasks }}</a>
+            <a href="{% url 'tasks-update' tasks.id%}">{{ tasks.title }}</a>
+            {% endif %}
         </div>
-        <a class="delete-link" href="{% url 'tasks-delete' tasks.id %}">&#215;</a>
-        {% endif %}
-        
+        <a class="delete-link" href="{% url 'tasks-delete' tasks.id %}" style="margin-left: 20px;">&#215;</a>
     </div>
+
+    {% if tasks.description %}
+    <div class="task-description">
+        <p id="description-{{ tasks.id }}" class="description-preview">
+            {{ tasks.description|slice:":100" }}{% if tasks.description|length > 100 %}...{% endif %}
+        </p>
+        {% if tasks.description|length > 100 %}
+        <button class="show-more-btn" onclick="toggleDescription('{{ tasks.id }}', '{{ tasks.description|escapejs }}')">Show More</button>
+        {% endif %}
+    </div>
+    {% else %}
+    <p>No description available.</p>
+    {% endif %}
+
     {% empty %}
     <h3>No items in list</h3>
     <a href="{% url 'task-create' %}">Add New Item</a>
     {% endfor %}
-
 </div>
 
-</div>
-<!-- <table>
-    <tr>
-        <th>Items</th>
-    </tr>
-    {% for tasks in task %}
-    <tr>
-        <td>{{ tasks.id }}  -  {{tasks.title}}</td>
-        <td><a href="{% url 'tasks-detail' tasks.id %}">View</a></td>
-        <td><a href="{% url 'task-create' %}">Add</a></td>
-        <td><a href="{% url 'tasks-update' tasks.id %}">update</a></td>
-        <td><a href="{% url 'tasks-delete' tasks.id %}">Delete</a></td>
+<script>
+    function toggleDescription(taskId, fullDescription) {
+        const descriptionElement = document.getElementById('description-' + taskId);
+        const buttonElement = document.querySelector('[onclick="toggleDescription(\'' + taskId + '\', \'' + fullDescription + '\')"]');
 
-    </tr>
-    {% empty %}
-    <h3>No items in list</h3>
-    <a href="{% url 'task-create' %}">Add New Item</a>
-    {% endfor %}
-</table> -->
+        if (buttonElement.innerText === "Show More") {
+            descriptionElement.innerText = fullDescription;
+            buttonElement.innerText = "Show Less";
+        } else {
+            descriptionElement.innerText = fullDescription.slice(0, 100) + (fullDescription.length > 100 ? "..." : "");
+            buttonElement.innerText = "Show More";
+        }
+    }
+</script>
+
+<style>
+    .task-wrapper {
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+    }
+
+    .task-title {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .delete-link {
+        color: red;
+        text-decoration: none;
+        font-size: 20px;
+    }
+
+    .description-preview {
+        font-size: 14px;
+        color: #555;
+        margin: 5px 0;
+    }
+
+    .show-more-btn {
+        background: none;
+        border: none;
+        color: #007BFF; /* Bootstrap blue color for links */
+        font-size: 12px;
+        cursor: pointer;
+        padding: 0;
+        text-decoration: underline;
+    }
+
+    .show-more-btn:hover {
+        color: #0056b3; /* Darker blue for hover */
+    }
+</style>
+
+
 {% endblock content %}

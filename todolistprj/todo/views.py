@@ -7,9 +7,12 @@ from django.contrib.auth.views import LoginView
 from django.views.generic.edit import FormView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from .models import Task
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 
 class TaskList(LoginRequiredMixin, ListView):
@@ -69,7 +72,7 @@ class RegisterPage(FormView):
     redirect_authenticated_user = True
     success_url = reverse_lazy('task')
 
-    def form_valid(self, form):
+    def form_valid(self, form): 
         user = form.save()
         if user is not None:
             login(self.request, user)
@@ -79,3 +82,10 @@ class RegisterPage(FormView):
         if self.request.user.is_authenticated:
             return redirect('task')
         return super(RegisterPage, self).get(*args, *kwargs)
+
+def logout_view(request):
+    """Logs out the user and redirects them to the login page."""
+
+    logout(request)  # Log out the user
+    request.session.flush()  # Clears the session
+    return redirect('login')  # Redirect to the login page
